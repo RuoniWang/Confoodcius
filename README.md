@@ -8,9 +8,8 @@
 - Expo
 
 ## Install Node
-download node 10+ from [here](https://nodejs.org/en/download/)
-install react native by run:
-
+- Download node 10+ from [here](https://nodejs.org/en/download/)
+- Install react native by run:
 ```npm install -g expo-cli```
 
 ## Test locally
