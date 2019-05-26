@@ -1,0 +1,21 @@
+{
+  "images": [
+    {
+      "classifiers": [
+        {
+          "classifier_id": "DefaultCustomModel_267056391",
+          "name": "Default Custom Model",
+          "classes": [
+            {
+              "class": "Fish",
+              "score": 0.721
+            }
+          ]
+        }
+      ],
+      "image": "burrito.jpg"
+    }
+  ],
+  "images_processed": 1,
+  "custom_classes": 2
+}

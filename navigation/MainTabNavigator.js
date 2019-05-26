@@ -3,58 +3,47 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
-import SettingsScreen from '../screens/SettingsScreen';
+import RecipeList from '../screens/RecipeList';
 
-const HomeStack = createStackNavigator({
-  Home: HomeScreen,
+import CameraPage from '../screens/CameraPage';
+import WatsonPage from '../screens/WatsonPage';
+
+// nest stack navigator to handle two internal views
+const ImageStack = createStackNavigator({
+  Camera: CameraPage,
+  Result: WatsonPage,
+  Links: RecipeList,
 });
 
-HomeStack.navigationOptions = {
-  tabBarLabel: 'Home',
+// override some navigation options - set a pretty icon
+ImageStack.navigationOptions = ({ navigation }) => ({
+  tabBarLabel: 'snap',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
+          ? 'ios-camera'
+          : 'md-camera'
       }
     />
   ),
-};
-
-const LinksStack = createStackNavigator({
-  Links: LinksScreen,
 });
-
-LinksStack.navigationOptions = {
-  tabBarLabel: 'Links',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
-    />
-  ),
-};
-
-const SettingsStack = createStackNavigator({
-  Settings: SettingsScreen,
-});
-
-SettingsStack.navigationOptions = {
-  tabBarLabel: 'Settings',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
-    />
-  ),
-};
+//
+// const LinksStack = createStackNavigator({
+//   Links: RecipeList,
+// });
+//
+// LinksStack.navigationOptions = {
+//   tabBarLabel: 'results',
+//   tabBarIcon: ({ focused }) => (
+//     <TabBarIcon
+//       focused={focused}
+//       name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
+//     />
+//   ),
+// };
 
 export default createBottomTabNavigator({
-  HomeStack,
-  LinksStack,
-  SettingsStack,
+  ImageStack,
 });
