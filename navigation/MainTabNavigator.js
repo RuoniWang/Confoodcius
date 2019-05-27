@@ -17,32 +17,18 @@ const ImageStack = createStackNavigator({
 
 // override some navigation options - set a pretty icon
 ImageStack.navigationOptions = ({ navigation }) => ({
-  tabBarLabel: 'snap',
+  tabBarLabel: 'home',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? 'ios-camera'
-          : 'md-camera'
+          ? 'ios-home'
+          : 'md-home'
       }
     />
   ),
 });
-//
-// const LinksStack = createStackNavigator({
-//   Links: RecipeList,
-// });
-//
-// LinksStack.navigationOptions = {
-//   tabBarLabel: 'results',
-//   tabBarIcon: ({ focused }) => (
-//     <TabBarIcon
-//       focused={focused}
-//       name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
-//     />
-//   ),
-// };
 
 export default createBottomTabNavigator({
   ImageStack,

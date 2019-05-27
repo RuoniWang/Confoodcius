@@ -5,6 +5,15 @@ import {
 } from 'react-native';
 
 export default (props) => {
+  if (props.navigation.state.params.result.images[0].classifiers[0].classes.length === 0) {
+    return (
+      <View style={styles.textContainer}>
+        <Text style={styles.textStyle}>
+          Oops, it seems that the picture is not identified as food objects. Click back to try again!
+        </Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <View style={styles.subcontainer}>
@@ -23,10 +32,9 @@ export default (props) => {
         <TouchableOpacity onPress={() => { props.navigation.navigate('Camera'); }}>
           <Text style={[styles.button, styles.greyButton]}>retake</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => { props.navigation.navigate('Links', { query: 'burrito' }); }}>
+        <TouchableOpacity onPress={() => { props.navigation.navigate('Links', { query: props.navigation.state.params.result.images[0].classifiers[0].classes[0].class }); }}>
           <Text style={[styles.button, styles.greenButton]}>Get Recipe!</Text>
         </TouchableOpacity>
-
       </View>
     </View>
 
@@ -43,10 +51,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  textContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   textStyle: {
     fontSize: 18,
     width: '80%',
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   image: {
@@ -74,7 +88,7 @@ const styles = StyleSheet.create({
     width: 130,
   },
   greenButton: {
-    backgroundColor: 'green',
+    backgroundColor: '#2ab7ca',
   },
   greyButton: {
     backgroundColor: 'lightgrey',

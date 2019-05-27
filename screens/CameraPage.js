@@ -1,52 +1,11 @@
 import React from 'react';
 import '../shim';
 import {
-  View, Text, StyleSheet, Image, TouchableOpacity, BlobModule,
+  View, Text, StyleSheet, Image, TouchableOpacity,
 } from 'react-native';
-import { Camera, Permissions, ImagePicker } from 'expo';
-import * as firebase from 'firebase';
-import ImageResizer from 'react-native-image-resizer';
-import Toolbar from './toolbar';
+import { Ionicons } from '@expo/vector-icons';
+import { Permissions, ImagePicker } from 'expo';
 
-
-const RESULTS = {
-  images: [
-    {
-      classifiers: [
-        {
-          classifier_id: 'DefaultCustomModel_267056391',
-          name: 'Default Custom Model',
-          classes: [
-            {
-              class: 'Fish',
-              score: 0.721,
-            },
-          ],
-        },
-      ],
-      image: 'burrito.jpg',
-    },
-  ],
-  images_processed: 1,
-  custom_classes: 2,
-};
-
-
-// const createFormData = (captures) => {
-//   const data = new FormData();
-//
-//   data.append('food', Platform.OS === 'ios' ? captures.uri.replace('file://', '') : captures.uri);
-//
-//   console.log(JSON.stringify(data));
-//   return data;
-// };
-
-const firebaseConfig = {
-  apiKey: 'AIzaSyDvpepF6NJHtwpGsgj3jCTFFDvL-s2GImc',
-  authDomain: 'confoodcius-53457.firebaseapp.com',
-  databaseURL: 'https://confoodcius-53457.firebaseio.com',
-  storageBucket: 'confoodcius-53457.appspot.com',
-};
 
 export default class CameraPage extends React.Component {
     camera = null;
@@ -54,10 +13,6 @@ export default class CameraPage extends React.Component {
     state = {
       captures: null,
       // setting flash to be turned off by default
-      flashMode: Camera.Constants.FlashMode.off,
-      capturing: null,
-      // start the back camera by default
-      cameraType: Camera.Constants.Type.back,
       hasCameraPermission: null,
     };
 
@@ -67,74 +22,26 @@ export default class CameraPage extends React.Component {
       const hasCameraPermission = (camera.status === 'granted' && cameraroll.status === 'granted');
 
       this.setState({ hasCameraPermission });
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
     }
 
-    setFlashMode = flashMode => this.setState({ flashMode });
-
-    setCameraType = cameraType => this.setState({ cameraType });
-
-    handleShortCapture = async () => {
-      this.setState({ capturing: true });
-      const photoData = await this.camera.takePictureAsync();
-      // const uri = this.resizeImage(photoData.uri);
-      this.setState({ capturing: false, captures: photoData });
-    };
-
-    resizeImage = async (url) => {
-      return ImageResizer.createResizedImage(url, 8, 6, 'JPEG', 80).then((resizedImageUri) => {
-        return resizedImageUri;
-      }).catch((err) => {
-        console.log(err);
-      });
-    }
 
     // call API later
     getRecipe = async () => {
       const { captures } = this.state;
-      // const response = await fetch(captures.uri);
-      // const blob = await response.blob();
-      // const blob = await new Promise((resolve, reject) => {
-      //   const xhr = new XMLHttpRequest();
-      //   xhr.onload = function () {
-      //     resolve(xhr.response);
-      //   };
-      //   xhr.onerror = function (e) {
-      //     console.log(e);
-      //     reject(new TypeError('Network request failed'));
-      //   };
-      //   xhr.responseType = 'blob';
-      //   xhr.open('GET', captures.uri, true);
-      //   xhr.send(null);
-      // });
-      //
-      //
-      // const metadata = {
-      //   contentType: 'image/jpeg',
-      // };
-      // const ref = firebase.storage().ref().child('images/work_image');
-      // const result = await ref.put(blob, metadata).then((res) => {
-      //   return ref.getDownloadURL().then((url) => { console.log(url); });
-      // }).catch((error) => {
-      //   console.log(error);
-      // });
 
-      // const data = new FormData();
-      // data.append('url', result);
-      // //
-      // // console.log(data);
-      //
-      // fetch('https://desolate-plateau-16252.herokuapp.com/upload', {
-      //   method: 'post',
-      //   body: data,
-      // }).then((res) => {
-      //   // this should be the query string
-      //   console.log(res);
-      // }).catch((err) => { console.log(err); });
+      const data = new FormData();
+      data.append('data', captures.base64);
 
-      this.props.navigation.navigate('Result', { result: RESULTS, captures, navigation: this.props.navigation });
+      const results = await fetch('https://desolate-plateau-16252.herokuapp.com/upload', {
+        method: 'POST',
+        body: data,
+      }).then((res) => {
+        // this should be the query string
+        console.log(JSON.stringify(res));
+        return res.json();
+      }).catch((err) => { console.log(err); });
+
+      this.props.navigation.navigate('Result', { result: results, captures, navigation: this.props.navigation });
 
       this.setState({ captures: null });
     }
@@ -142,23 +49,33 @@ export default class CameraPage extends React.Component {
     retake=() => this.setState({ captures: null });
 
     chooseImagePress = async () => {
-      // const result = await ImagePicker.launchImageLibraryAsync({
-      //   allowsEditing: true,
-      //   base64: true,
-      //   aspect: [4, 3],
-      // });
-      const result = await ImagePicker.launchImageLibraryAsync();
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        base64: true,
+        aspect: [4, 3],
+      });
+
       if (!result.cancelled) {
         this.setState({ captures: result });
-        console.log('sending');
-        // this.uploadAsFile(result);
+      }
+    }
+
+    takeImagePress = async () => {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        base64: true,
+        aspect: [4, 3],
+      });
+
+      if (!result.cancelled) {
+        this.setState({ captures: result });
       }
     }
 
 
     render() {
       const {
-        captures, hasCameraPermission, flashMode, cameraType, capturing,
+        captures, hasCameraPermission,
       } = this.state;
       if (hasCameraPermission === null) {
         return <View />;
@@ -168,21 +85,22 @@ export default class CameraPage extends React.Component {
       if (captures == null) {
         return (
           <View style={styles.container}>
-            <Camera
-              type={cameraType}
-              flashMode={flashMode}
-              style={styles.preview}
-              ref={camera => this.camera = camera}
-            />
-            <Toolbar
-              capturing={capturing}
-              flashMode={flashMode}
-              cameraType={cameraType}
-              setFlashMode={this.setFlashMode}
-              setCameraType={this.setCameraType}
-              onShortCapture={this.handleShortCapture}
-              chooseImagePress={this.chooseImagePress}
-            />
+            <TouchableOpacity style={[styles.subcontainer]} onPress={this.chooseImagePress}>
+              <Ionicons
+                name="ios-photos"
+                color="#2ab7ca"
+                size={100}
+              />
+              <Text>Select From Gallery</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.subcontainer} onPress={this.takeImagePress}>
+              <Ionicons
+                name="ios-camera"
+                color="#2ab7ca"
+                size={100}
+              />
+              <Text>Take Photo</Text>
+            </TouchableOpacity>
           </View>
         );
       } else {
@@ -209,6 +127,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+  },
+  subcontainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 20,
+    backgroundColor: 'lightgrey',
+    width: '70%',
+    marginLeft: 50,
+    padding: 10,
   },
   preview: {
     flex: 1,
@@ -246,7 +173,7 @@ const styles = StyleSheet.create({
     width: 130,
   },
   blueButton: {
-    backgroundColor: 'green',
+    backgroundColor: '#2ab7ca',
   },
   greyButton: {
     backgroundColor: 'lightgrey',
