@@ -1,10 +1,12 @@
 import React from 'react';
 import '../shim';
 import {
-  View, Text, StyleSheet, Image, TouchableOpacity, Platform,
+  View, Text, StyleSheet, Image, TouchableOpacity, BlobModule,
 } from 'react-native';
-import { Camera, Permissions } from 'expo';
+import { Camera, Permissions, ImagePicker } from 'expo';
+import * as firebase from 'firebase';
 import Toolbar from './toolbar';
+
 
 const RESULTS = {
   images: [
@@ -29,19 +31,20 @@ const RESULTS = {
 };
 
 
-const createFormData = (captures, body) => {
-  const data = new FormData();
+// const createFormData = (captures) => {
+//   const data = new FormData();
+//
+//   data.append('food', Platform.OS === 'ios' ? captures.uri.replace('file://', '') : captures.uri);
+//
+//   console.log(JSON.stringify(data));
+//   return data;
+// };
 
-  data.append('food', {
-    uri: Platform.OS === 'ios' ? captures.uri.replace('file://', '') : captures.uri,
-  });
-
-  Object.keys(body).forEach((key) => {
-    data.append(key, body[key]);
-  });
-
-  console.log(JSON.stringify(data));
-  return data;
+const firebaseConfig = {
+  apiKey: 'AIzaSyDvpepF6NJHtwpGsgj3jCTFFDvL-s2GImc',
+  authDomain: 'confoodcius-53457.firebaseapp.com',
+  databaseURL: 'https://confoodcius-53457.firebaseio.com',
+  storageBucket: 'confoodcius-53457.appspot.com',
 };
 
 export default class CameraPage extends React.Component {
@@ -59,10 +62,13 @@ export default class CameraPage extends React.Component {
 
     async componentDidMount() {
       const camera = await Permissions.askAsync(Permissions.CAMERA);
-      const audio = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-      const hasCameraPermission = (camera.status === 'granted' && audio.status === 'granted');
+      const cameraroll = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      const hasCameraPermission = (camera.status === 'granted' && cameraroll.status === 'granted');
 
       this.setState({ hasCameraPermission });
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
     }
 
     setFlashMode = flashMode => this.setState({ flashMode });
@@ -75,27 +81,44 @@ export default class CameraPage extends React.Component {
       this.setState({ capturing: false, captures: photoData });
     };
 
+
     // call API later
     getRecipe = async () => {
       const { captures } = this.state;
-      const results = await fetch('http://localhost:5000/upload', {
-        method: 'POST',
-        body: createFormData(this.state.captures, { userId: '123' }),
-      })
-        .then(response => response.json())
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((error) => {
-          console.log('upload error', error);
-        });
-      console.log(this.props.navigation.state);
-      this.props.navigation.navigate('Result', { result: RESULTS, captures, navigation: this.props.navigation });
-      this.setState({ captures: null });
-    };
+      const response = await fetch(captures.uri);
+      const blob = await response.blob();
 
+      const data = new FormData();
+      data.append('data', blob);
+
+      console.log(data);
+
+      fetch('https://desolate-plateau-16252.herokuapp.com/upload', {
+        method: 'post',
+        body: data,
+      }).then((res) => {
+        console.log(res);
+      }).catch((err) => { console.log(err); });
+
+      // const metadata = {
+      //   contentType: 'image/jpeg',
+      // };
+      // const ref = firebase.storage().ref().child('images/new_image');
+      // ref.put(blob, metadata).then((res) => {
+      //   ref.getDownloadURL().then((url) => { console.log(url); });
+      // }).catch((error) => {
+      //   console.log(error);
+      // });
+    }
 
     retake=() => this.setState({ captures: null });
+
+    chooseImagePress = async () => {
+      const result = await ImagePicker.launchImageLibraryAsync();
+      if (!result.cancelled) {
+        this.setState({ captures: result });
+      }
+    }
 
     render() {
       const {
@@ -122,6 +145,7 @@ export default class CameraPage extends React.Component {
               setFlashMode={this.setFlashMode}
               setCameraType={this.setCameraType}
               onShortCapture={this.handleShortCapture}
+              chooseImagePress={this.chooseImagePress}
             />
           </View>
         );

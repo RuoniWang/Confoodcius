@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 
 export default (props) => {
-  console.log(props.navigation.state);
   return (
     <View style={styles.container}>
       <View style={styles.subcontainer}>

@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: 'white',
     justifyContent: 'center',
-    alighItems: 'center',
+    alignItems: 'center',
   },
   thumbnail: {
     width: 100,

@@ -12,6 +12,7 @@ const { FlashMode: CameraFlashModes, Type: CameraTypes } = Camera.Constants;
 export default ({
   capturing = false,
   cameraType = CameraTypes.back,
+  chooseImagePress,
   flashMode = CameraFlashModes.off,
   setFlashMode, setCameraType,
   onShortCapture,
@@ -40,12 +41,9 @@ export default ({
         </TouchableWithoutFeedback>
       </Col>
       <Col style={styles.alignCenter}>
-        <TouchableOpacity onPress={() => setCameraType(
-          cameraType === CameraTypes.back ? CameraTypes.front : CameraTypes.back,
-        )}
-        >
+        <TouchableOpacity onPress={chooseImagePress}>
           <Ionicons
-            name="md-reverse-camera"
+            name="ios-photos"
             color="white"
             size={30}
           />
