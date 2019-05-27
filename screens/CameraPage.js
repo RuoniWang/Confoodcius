@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Camera, Permissions, ImagePicker } from 'expo';
 import * as firebase from 'firebase';
+import ImageResizer from 'react-native-image-resizer';
 import Toolbar from './toolbar';
 
 
@@ -78,47 +79,82 @@ export default class CameraPage extends React.Component {
     handleShortCapture = async () => {
       this.setState({ capturing: true });
       const photoData = await this.camera.takePictureAsync();
+      // const uri = this.resizeImage(photoData.uri);
       this.setState({ capturing: false, captures: photoData });
     };
 
+    resizeImage = async (url) => {
+      return ImageResizer.createResizedImage(url, 8, 6, 'JPEG', 80).then((resizedImageUri) => {
+        return resizedImageUri;
+      }).catch((err) => {
+        console.log(err);
+      });
+    }
 
     // call API later
     getRecipe = async () => {
       const { captures } = this.state;
-      const response = await fetch(captures.uri);
-      const blob = await response.blob();
-
-      const data = new FormData();
-      data.append('data', blob);
-
-      console.log(data);
-
-      fetch('https://desolate-plateau-16252.herokuapp.com/upload', {
-        method: 'post',
-        body: data,
-      }).then((res) => {
-        console.log(res);
-      }).catch((err) => { console.log(err); });
-
+      // const response = await fetch(captures.uri);
+      // const blob = await response.blob();
+      // const blob = await new Promise((resolve, reject) => {
+      //   const xhr = new XMLHttpRequest();
+      //   xhr.onload = function () {
+      //     resolve(xhr.response);
+      //   };
+      //   xhr.onerror = function (e) {
+      //     console.log(e);
+      //     reject(new TypeError('Network request failed'));
+      //   };
+      //   xhr.responseType = 'blob';
+      //   xhr.open('GET', captures.uri, true);
+      //   xhr.send(null);
+      // });
+      //
+      //
       // const metadata = {
       //   contentType: 'image/jpeg',
       // };
-      // const ref = firebase.storage().ref().child('images/new_image');
-      // ref.put(blob, metadata).then((res) => {
-      //   ref.getDownloadURL().then((url) => { console.log(url); });
+      // const ref = firebase.storage().ref().child('images/work_image');
+      // const result = await ref.put(blob, metadata).then((res) => {
+      //   return ref.getDownloadURL().then((url) => { console.log(url); });
       // }).catch((error) => {
       //   console.log(error);
       // });
+
+      // const data = new FormData();
+      // data.append('url', result);
+      // //
+      // // console.log(data);
+      //
+      // fetch('https://desolate-plateau-16252.herokuapp.com/upload', {
+      //   method: 'post',
+      //   body: data,
+      // }).then((res) => {
+      //   // this should be the query string
+      //   console.log(res);
+      // }).catch((err) => { console.log(err); });
+
+      this.props.navigation.navigate('Result', { result: RESULTS, captures, navigation: this.props.navigation });
+
+      this.setState({ captures: null });
     }
 
     retake=() => this.setState({ captures: null });
 
     chooseImagePress = async () => {
+      // const result = await ImagePicker.launchImageLibraryAsync({
+      //   allowsEditing: true,
+      //   base64: true,
+      //   aspect: [4, 3],
+      // });
       const result = await ImagePicker.launchImageLibraryAsync();
       if (!result.cancelled) {
         this.setState({ captures: result });
+        console.log('sending');
+        // this.uploadAsFile(result);
       }
     }
+
 
     render() {
       const {
