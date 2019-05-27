@@ -1,4 +1,3 @@
-// src/toolbar.component.js file
 import React from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Image,

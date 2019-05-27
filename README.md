@@ -15,4 +15,4 @@
 ## Test locally
 - run `npm install`
 - Install expo client on your mobile device (download from app store)
-- run `npm start`, follow instruction to scan QR code and test on your phone
+- run `yarn start`, follow instruction to scan QR code and test on your phone
