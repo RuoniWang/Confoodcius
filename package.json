@@ -29,7 +29,7 @@
     "firebase": "^6.0.4",
     "https-browserify": "0.0.1",
     "install": "^0.12.2",
-    "npm": "^6.9.0",
+    "npm": "^6.14.6",
     "path-browserify": "0.0.0",
     "process": "^0.11.10",
     "punycode": "^1.4.1",
